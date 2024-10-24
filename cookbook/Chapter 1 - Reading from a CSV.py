@@ -14,7 +14,7 @@ import polars as pl
 #broken_df = pd.read_csv("C:/Users/nick/Projects/pandas_to_polars_cookbook/data/bikes.csv", encoding="ISO-8859-1")
 
 # TODO: please load the data with the Polars library (do not forget to import Polars at the top of the script) and call it pl_broken_df
-pl_broken_df = pl.read_csv("C:/Users/nick/Projects/pandas_to_polars_cookbook/data/bikes.csv", separator=";", encoding="utf8",try_parse_dates=True)
+pl_broken_df = pl.read_csv("../data/bikes.csv", separator=";", encoding="utf8",try_parse_dates=True)
 # %%
 # Look at the first 3 rows
 
@@ -65,8 +65,8 @@ print(pl_fixed_df.select("Berri 1"))
 
 # TODO: how would you do this with a Polars data frame?
 
-#plt.plot(pl_fixed_df.select("Berri 1"))
-#plt.show()
+plt.plot(pl_fixed_df.select("Berri 1"))
+plt.show()
 # %%
 # We can also plot all the columns just as easily. We'll make it a little bigger, too.
 # You can see that it's more squished together, but all the bike paths behave basically the same -- if it's a bad day for cyclists, it's a bad day everywhere.
@@ -75,7 +75,7 @@ print(pl_fixed_df.select("Berri 1"))
 #plt.show()
 
 # TODO: how would you do this with a Polars data frame? With Polars data frames you might have to use the Seaborn library and it mmight not work out of the box as with pandas.
-pd_fixed_df = pl_fixed_df.to_pandas()
+pd_fixed_df = pl_fixed_df.to_pandas() #convert to pandas since polars does not have a built in plotting function
 plt.figure(figsize=(15, 10))
-plt.plot(pd_fixed_df.select_dtypes(include=['number']))
+plt.plot(pd_fixed_df.select_dtypes(include=['number'])) #throws an error unless numeric columns are specified
 plt.show()
