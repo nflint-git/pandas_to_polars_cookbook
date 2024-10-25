@@ -2,6 +2,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import polars as pl
 
 plt.style.use("ggplot")
 plt.rcParams["figure.figsize"] = (15, 3)
@@ -16,7 +17,10 @@ weather_2012 = pd.read_csv(
 weather_2012[:5]
 
 # TODO: load the data using polars and call the data frame pl_wather_2012
-
+pl_weather_2012 = pl.read_csv("../data/weather_2012.csv")
+pl_weather_2012 = pl_weather_2012.with_columns(
+    pl.col("date_time").str.strptime(pl.Date, "%Y-%m-%d %H:%M:%S").alias("date_time")
+)
 
 # %%
 # You'll see that the 'Weather' column has a text description of the weather that was going on each hour. We'll assume it's snowing if the text description contains "Snow".
@@ -30,7 +34,12 @@ is_snowing.plot()
 plt.show()
 
 # TODO: do the same with polars
-
+weather_description = pl_weather_2012["weather"]
+is_snowing = pl_weather_2012.with_columns(
+    pl.col("weather").str.contains("Snow").cast(pl.Float64).alias("is_snowing")
+)
+is_snowing.to_pandas()["is_snowing"].plot()
+plt.show()
 
 # %%
 # If we wanted the median temperature each month, we could use the `resample()` method like this:
@@ -40,7 +49,14 @@ plt.show()
 # Unsurprisingly, July and August are the warmest.
 
 # TODO: and now in Polars
-
+pl_weather_2012 = pl_weather_2012.with_columns(
+    pl.col("date_time").dt.truncate("1mo").alias("month")
+)
+monthly_median_temperature = pl_weather_2012.group_by("month").agg(
+    pl.col("temperature_c").median().alias("median_temperature")
+)
+monthly_median_temperature.to_pandas().set_index("month")["median_temperature"].plot(kind="bar")
+plt.show()
 
 # %%
 # So we can think of snowiness as being a bunch of 1s and 0s instead of `True`s and `False`s:
@@ -53,3 +69,8 @@ plt.show()
 # So now we know! In 2012, December was the snowiest month. Also, this graph suggests something that I feel -- it starts snowing pretty abruptly in November, and then tapers off slowly and takes a long time to stop, with the last snow usually being in April or May.
 
 # TODO: please do the same in Polars
+monthly_snowing_percentage = is_snowing.groupby("month").agg(
+    pl.col("is_snowing").mean().alias("snowing_percentage")
+)
+monthly_snowing_percentage.to_pandas().set_index("month")["snowing_percentage"].plot(kind="bar")
+plt.show()
